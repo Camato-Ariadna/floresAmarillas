@@ -79,3 +79,36 @@ footer {
     color: #d4a017;
     font-size: 1.5rem;
 }
+
+
+/* style.css (Nuevo contenido al final) */
+
+/* Estilos para los elementos SVG generados por JS */
+.trunk {
+    fill: url(#trunkGradient);
+    stroke: #5d4037;
+    stroke-width: 1;
+}
+
+.branch {
+    fill: #8b5a2b;
+    stroke: #5d4037;
+    stroke-width: 0.5;
+}
+
+/* La flor-corazón */
+.heart-flower {
+    fill: #ffeb3b; /* Amarillo brillante */
+    stroke: #fbc02d;
+    stroke-width: 0.5;
+    opacity: 0; /* Empiezan invisibles */
+    transform-origin: center; /* Para que crezcan desde su centro */
+}
+
+/* La mariposa (usaremos el mismo elemento pero cambiamos el estilo al final) */
+.butterfly {
+    fill: #fff176; /* Amarillo más suave */
+    stroke: #fbc02d;
+    stroke-width: 0.3;
+    opacity: 1;
+}
