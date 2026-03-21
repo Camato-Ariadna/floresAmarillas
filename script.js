@@ -77,14 +77,14 @@ document.addEventListener("DOMContentLoaded", () => {
             flowers.push({ el: f, x, y });
 
             f.animate([
-                { transform: `translate(${x}, ${y}) scale(0)`, opacity: 0 },
-                { transform: `translate(${x}, ${y}) scale(1.5)`, opacity: 1 }
-            ], {
-                duration: 800,
-                delay: Math.random() * CONFIG.bloomTime,
-                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                fill: 'forwards'
-            });
+    { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 },
+    { transform: `translate(${x}px, ${y}px) scale(1.5)`, opacity: 1 }
+], {
+    duration: 800,
+    delay: Math.random() * CONFIG.bloomTime,
+    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    fill: 'forwards'
+});
         }
         setTimeout(() => escape(flowers), CONFIG.bloomTime + CONFIG.waitTime);
     }
@@ -94,15 +94,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const destX = f.x + (Math.random() - 0.5) * 800;
             const destY = -200;
 
-            f.el.animate([
-                { transform: `translate(${f.x}, ${f.y}) scale(1.5)`, opacity: 1 },
-                { transform: `translate(${destX}, ${destY}) scale(0.5)`, opacity: 0 }
-            ], {
-                duration: CONFIG.escapeTime,
-                delay: Math.random() * 800,
-                easing: 'ease-in',
-                fill: 'forwards'
-            });
+           f.el.animate([
+    { transform: `translate(${f.x}px, ${f.y}px) scale(1.5)`, opacity: 1 },
+    { transform: `translate(${destX}px, ${destY}px) scale(0.5)`, opacity: 0 }
+], {
+    duration: CONFIG.escapeTime,
+    delay: Math.random() * 800,
+    easing: 'ease-in',
+    fill: 'forwards'
+});
         });
         setTimeout(startCycle, CONFIG.escapeTime + 1000);
     }
