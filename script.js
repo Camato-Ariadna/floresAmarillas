@@ -1,25 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. EL CONTADOR (Mantenemos la lógica que ya funcionaba)
+    // 1. CONTADOR
     const counterElement = document.getElementById("flower-counter");
-    const startDate = new Date("2026-03-14T00:00:00");
-    const today = new Date();
-    const diffInDays = Math.floor((today - startDate) / (1000 * 3600 * 24)) + 1;
-    let totalFlowers = 0;
-    for (let i = 0; i < diffInDays; i++) {
-        totalFlowers += Math.floor(Math.random() * 5) + 1;
+    if (counterElement) {
+        const startDate = new Date("2026-03-14T00:00:00");
+        const today = new Date();
+        const diffInDays = Math.floor((today - startDate) / (1000 * 3600 * 24)) + 1;
+        let totalFlowers = 0;
+        for (let i = 0; i < diffInDays; i++) {
+            totalFlowers += Math.floor(Math.random() * 5) + 1;
+        }
+        counterElement.innerText = totalFlowers.toLocaleString();
     }
-    counterElement.innerText = totalFlowers.toLocaleString();
 
-    // 2. LA ANIMACIÓN
+    // 2. ANIMACIÓN
     const svg = document.getElementById("garden-svg");
-    const NS = "http://www.w3.org/2000/svg";
+    if (!svg) return; // Si no encuentra el SVG, no ejecuta el resto para no dar error
 
+    const NS = "http://www.w3.org/2000/svg";
     const CONFIG = {
         trunkHeight: 300,
         trunkWidth: 15,
-        baseY: 500, 
+        baseY: 550, 
         baseX: 300,
-        numFlowers: 40, // Reducido un poco para que sea más fluido
+        numFlowers: 40,
         growTime: 2000, 
         bloomTime: 1000, 
         waitTime: 3000, 
@@ -27,21 +30,20 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function startCycle() {
-        // Limpiamos solo los rectángulos y paths, manteniendo los <defs>
-        const elementsToRemove = svg.querySelectorAll('rect, path:not([id])');
-        elementsToRemove.forEach(el => el.remove());
-        
+        // Limpiamos elementos anteriores
+        const toRemove = svg.querySelectorAll('rect, path:not([id])');
+        toRemove.forEach(el => el.remove());
         growTree();
     }
 
     function growTree() {
         const trunk = document.createElementNS(NS, "rect");
-        trunk.setAttribute("fill", "#8b4513"); // Color sólido de respaldo
         trunk.setAttribute("x", CONFIG.baseX - CONFIG.trunkWidth / 2);
         trunk.setAttribute("width", CONFIG.trunkWidth);
-        // Empezamos con el tronco ya en su posición pero altura 0
         trunk.setAttribute("y", CONFIG.baseY);
         trunk.setAttribute("height", 0);
+        trunk.setAttribute("fill", "#8b4513");
+        trunk.setAttribute("rx", "5");
         svg.appendChild(trunk);
 
         const anim = trunk.animate([
@@ -57,20 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function bloom() {
-        // Path de un corazón escalado
         const heartPath = "M10,30 A5,5 0 0,1 20,30 A5,5 0 0,1 30,30 Q30,45 20,55 Q10,45 10,30 Z";
         const flowers = [];
 
         for (let i = 0; i < CONFIG.numFlowers; i++) {
             const f = document.createElementNS(NS, "path");
             f.setAttribute("d", heartPath);
-            f.setAttribute("fill", "#FFD700"); // Amarillo Oro
+            f.setAttribute("fill", "#FFD700");
             
-            // Posición en la copa
             const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 100;
+            const dist = Math.random() * 120;
             const x = CONFIG.baseX + Math.cos(angle) * dist - 20;
-            const y = (CONFIG.baseY - CONFIG.trunkHeight) + Math.sin(angle) * dist * 0.6 - 20;
+            const y = (CONFIG.baseY - CONFIG.trunkHeight) + Math.sin(angle) * dist * 0.5 - 20;
 
             f.setAttribute("transform", `translate(${x}, ${y}) scale(0)`);
             svg.appendChild(f);
@@ -86,27 +86,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 fill: 'forwards'
             });
         }
-
         setTimeout(() => escape(flowers), CONFIG.bloomTime + CONFIG.waitTime);
     }
 
     function escape(flowers) {
         flowers.forEach(f => {
-            const destX = f.x + (Math.random() - 0.5) * 600;
-            const destY = -100;
+            const destX = f.x + (Math.random() - 0.5) * 800;
+            const destY = -200;
 
             f.el.animate([
                 { transform: `translate(${f.x}, ${f.y}) scale(1.5)`, opacity: 1 },
                 { transform: `translate(${destX}, ${destY}) scale(0.5)`, opacity: 0 }
             ], {
                 duration: CONFIG.escapeTime,
-                delay: Math.random() * 500,
+                delay: Math.random() * 800,
                 easing: 'ease-in',
                 fill: 'forwards'
             });
         });
-
-        setTimeout(startCycle, CONFIG.escapeTime + 500);
+        setTimeout(startCycle, CONFIG.escapeTime + 1000);
     }
 
     startCycle();
