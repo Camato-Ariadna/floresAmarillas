@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { y: CONFIG.baseY - CONFIG.trunkHeight, height: CONFIG.trunkHeight }
         ], {
             duration: CONFIG.growTime,
-            easing: 'ease-out',
+            easing: 'ease-out'
             fill: 'forwards'
         });
 
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ], {
                 duration: 800,
                 delay: Math.random() * CONFIG.bloomTime,
-                easing: 'back-out',
+                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
                 fill: 'forwards'
             });
         }
