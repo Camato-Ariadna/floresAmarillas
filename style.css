@@ -51,6 +51,7 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%; /* Asegura que tenga altura */
 }
 
 /* Placeholder para la animación */
@@ -115,9 +116,9 @@ footer {
 
 
 #garden-svg {
-    display: block;
     width: 100%;
-    height: 500px; /* Dale una altura fija para asegurar que se vea */
-    max-height: 80vh;
-    overflow: visible; /* Para que las mariposas se vean saliendo */
+    height: 100%;
+    max-height: 500px;
+    display: block;
+    overflow: visible;
 }
