@@ -1,0 +1,81 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fffdf0; /* Un blanco hueso muy suave */
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.main-title {
+    font-size: 3rem;
+    color: #d4a017; /* Amarillo mostaza elegante */
+    text-transform: lowercase;
+    letter-spacing: 5px;
+}
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    align-items: center;
+}
+
+.left-panel {
+    flex: 0 0 35%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-right: 1px solid #eee;
+}
+
+.special-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.5rem;
+    color: #555;
+    text-align: center;
+}
+
+.right-panel {
+    flex: 0 0 65%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Placeholder para la animación */
+#animation-container {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+footer {
+    padding: 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+    border-top: 1px solid #ddd;
+}
+
+.counter-container p {
+    font-weight: 700;
+    color: #333;
+}
+
+#flower-counter {
+    color: #d4a017;
+    font-size: 1.5rem;
+}
