@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
             { y: CONFIG.baseY - CONFIG.trunkHeight, height: CONFIG.trunkHeight }
         ], {
             duration: CONFIG.growTime,
-            easing: 'ease-out'
+            easing: 'ease-out',
             fill: 'forwards'
         });
 
