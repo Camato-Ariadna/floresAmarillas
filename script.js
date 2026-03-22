@@ -1,166 +1,120 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. CONTADOR (Mantener igual)
+    // --- 1. EL CONTADOR (Mantenemos la lógica que ya funcionaba) ---
     const counterElement = document.getElementById("flower-counter");
     if (counterElement) {
+        // Fecha de inicio: 14 de Marzo de 2026
         const startDate = new Date("2026-03-14T00:00:00");
         const today = new Date();
-        const diffInDays = Math.floor((today - startDate) / (1000 * 3600 * 24)) + 1;
+        
+        // Calculamos la diferencia en días
+        const diffInMs = today - startDate;
+        const diffInDays = Math.floor(diffInMs / (1000 * 3600 * 24)) + 1; // +1 para incluir el día actual
+        
+        // Lógica para acumular flores (ej: entre 1 y 5 flores nuevas por día)
         let totalFlowers = 0;
         for (let i = 0; i < diffInDays; i++) {
             totalFlowers += Math.floor(Math.random() * 5) + 1;
         }
+        
+        // Mostramos el total formateado
         counterElement.innerText = totalFlowers.toLocaleString();
     }
 
+    // --- 2. LA ANIMACIÓN DEL CORAZÓN DE FLORES ---
     const svg = document.getElementById("garden-svg");
-    if (!svg) return;
-    const NS = "http://www.w3.org/2000/svg";
+    if (!svg) return; // Seguridad si no encuentra el SVG
 
+    const NS = "http://www.w3.org/2000/svg";
+    
+    // Configuración de la animación
     const CONFIG = {
-        baseX: 300,
-        baseY: 550,
-        numFlowers: 400, // ¡Volvemos a alta densidad para que se llene!
-        waitTime: 6000
+        baseX: 300,         // Centro horizontal del SVG
+        baseY: 300,         // Centro vertical del SVG (donde se formará el corazón)
+        numFlowers: 200,    // Cantidad de flores para formar el corazón
+        bloomTime: 2000,    // Tiempo que tardan en aparecer todas las flores (ms)
+        waitTime: 4000,     // Tiempo que se queda el corazón formado (ms)
+        escapeTime: 3000    // Tiempo que tardan en irse volando (ms)
     };
 
+    // Función principal para iniciar el ciclo
     function startCycle() {
-        svg.innerHTML = ''; // Limpieza total
-        svg.innerHTML = `
-            <defs>
-                <radialGradient id="flowerGrad">
-                    <stop offset="10%" stop-color="#FFF59D" />
-                    <stop offset="95%" stop-color="#FDD835" />
-                </radialGradient>
-            </defs>
-        `;
-        // Paso 2: Creamos el árbol y guardamos los puntos de las puntas
-        const treeBranchTips = [];
-        growTreeAndBloom(treeBranchTips);
+        // Limpiamos todo el contenido previo del SVG
+        svg.innerHTML = '';
+        
+        // Creamos y animamos las flores
+        createHeartOfFlowers();
     }
 
-    // NUEVA FUNCIÓN DE CRECIMIENTO RECURSIVO INTEGRADO
-    function createBranchRecursive(x1, y1, angle, length, width, level, maxLevel, branchTipsArray) {
-        if (level >= maxLevel) {
-            // Si es una punta final, la guardamos para las flores de densidad
-            branchTipsArray.push({ x: x1, y: y1 });
-            return;
+    function createHeartOfFlowers() {
+        // Path de la florecita amarilla (reutilizamos el diseño que te gustó)
+        const flowerPath = "M0,0 C-2,-5 -5,-5 -5,0 C-5,5 -2,5 0,0 C2,5 5,5 5,0 C5,-5 2,-5 0,0";
+        const flowers = [];
+
+        for (let i = 0; i < CONFIG.numFlowers; i++) {
+            const f = document.createElementNS(NS, "path");
+            f.setAttribute("d", flowerPath);
+            f.setAttribute("fill", "#FFD700"); // Amarillo Oro
+            f.setAttribute("stroke", "#FBC02D"); // Borde amarillo oscuro
+            f.setAttribute("stroke-width", "0.3");
+            
+            // --- FÓRMULA MATEMÁTICA DEL CORAZÓN (Cardioide) ---
+            // Usamos una ecuación para distribuir los puntos formando un corazón
+            const t = Math.random() * 2 * Math.PI; // Ángulo aleatorio
+            const r = (Math.sqrt(Math.random()) * 12) + 2; // Radio aleatorio para rellenar
+            
+            const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
+            const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+
+            const finalX = CONFIG.baseX + xOffset;
+            const finalY = CONFIG.baseY + yOffset;
+
+            // Colocamos la flor inicialmente invisible y en escala 0
+            f.setAttribute("transform", `translate(${finalX} ${finalY}) scale(0)`);
+            svg.appendChild(f);
+            
+            // Guardamos la referencia y posición final para la fase de escape
+            flowers.push({ el: f, x: finalX, y: finalY });
+
+            // --- ANIMACIÓN 1: APARECER (BLOOM) ---
+            f.animate([
+                { transform: `translate(${finalX}px, ${finalY}px) scale(0)`, opacity: 0 },
+                { transform: `translate(${finalX}px, ${finalY}px) scale(${Math.random() * 1.5 + 0.5}) rotate(${Math.random() * 360}deg)`, opacity: 1 }
+            ], {
+                duration: 1000, // Cada flor tarda 1s en crecer
+                delay: Math.random() * CONFIG.bloomTime, // Aparecen dispersas en el tiempo
+                easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Efecto "pop" al aparecer
+                fill: 'forwards'
+            });
         }
 
-        const x2 = x1 + Math.cos(angle * Math.PI / 180) * length;
-        const y2 = y1 + Math.sin(angle * Math.PI / 180) * length;
-
-        const line = document.createElementNS(NS, "line");
-        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
-        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-        line.setAttribute("stroke", "#4E342E"); // Café oscuro
-        line.setAttribute("stroke-width", width);
-        line.setAttribute("stroke-linecap", "round");
-        
-        // Animación de crecimiento de la rama
-        line.style.strokeDasharray = length;
-        line.style.strokeDashoffset = length;
-        svg.appendChild(line);
-
-        line.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
-            duration: 700 + (level * 200), // Ramas principales más lentas
-            fill: 'forwards',
-            easing: 'ease-in-out'
-        });
-
-        // --- FLORECIMIENTO INTEGRADO ---
-        // Nace una flor grande exactamente en la punta de cada rama principal que termina de crecer
-        setTimeout(() => {
-           const animFlower = document.createElementNS(NS, "path");
-           // Usamos x2 y y2, las coordenadas finales de la rama
-           createSingleOrganicFlower(animFlower, x2, y2, 1.3, 1500);
-        }, 600 + (level * 200));
-
-        // Crear dos ramas más pequeñas (hijas) con ángulos que formen corazón
-        const angleSpread = 30 + (level * 3); // Aumentamos la apertura arriba
-        setTimeout(() => {
-            createBranchRecursive(x2, y2, angle - angleSpread, length * 0.72, width * 0.65, level + 1, maxLevel, branchTipsArray);
-            createBranchRecursive(x2, y2, angle + angleSpread, length * 0.72, width * 0.65, level + 1, maxLevel, branchTipsArray);
-        }, 500 + (level * 150)); // Retraso en cascada
+        // Programamos la siguiente fase: irse volando
+        setTimeout(() => escapeFlowers(flowers), CONFIG.bloomTime + CONFIG.waitTime);
     }
 
-    function createSingleOrganicFlower(f, centerX, centerY, scaleFactor, animDuration) {
-        const flowerPath = "M0,0 C-2,-5 -5,-5 -5,0 C-5,5 -2,5 0,0 C2,5 5,5 5,0 C5,-5 2,-5 0,0";
-        f.setAttribute("d", flowerPath);
-        f.setAttribute("fill", "url(#flowerGrad)");
-        f.setAttribute("stroke", "#FBC02D");
-        f.setAttribute("stroke-width", "0.2");
-
-        f.setAttribute("transform", `translate(${centerX} ${centerY}) scale(0)`);
-        svg.appendChild(f);
-
-        f.animate([
-            { transform: `translate(${centerX}px, ${centerY}px) scale(0)`, opacity: 0 },
-            { transform: `translate(${centerX}px, ${centerY}px) scale(${scaleFactor}) rotate(${Math.random() * 360}deg)`, opacity: 1 }
-        ], {
-            duration: animDuration,
-            easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Easing corregido
-            fill: 'forwards'
-        });
-    }
-
-    function growTreeAndBloom(branchTips) {
-        // Tronco principal: 
-        // 180px de altura y se divide en 6 niveles de ramas
-        createBranchRecursive(CONFIG.baseX, CONFIG.baseY, -90, 180, 15, 0, 6, branchTips);
-        
-        // --- FLORECIMIENTO DE RELLENO (Densidad) ---
-        // Nace de las puntas finales para que el corazón se vea lleno
-        setTimeout(() => {
-            // Usamos una ecuación de corazón (Cardioide) guiada por el árbol
-            const fillingPoints = getHeartPoints(CONFIG.baseX, CONFIG.baseY - 180 - 60, 13);
-            const fillingFlowers = [];
-            
-            for (let i = 0; i < CONFIG.numFlowers; i++) {
-                const targetPoint = fillingPoints[i];
-                const animFlower = document.createElementNS(NS, "path");
-                // Nacimiento de las flores de relleno
-                createSingleOrganicFlower(animFlower, targetPoint.x, targetPoint.y, Math.random() * 1.0 + 0.3, 1200);
-                fillingFlowers.push({ el: animFlower, x: targetPoint.x, y: targetPoint.y });
-            }
-            
-            // --- ESCAPE (SE MANTIENE IGUAL, pero con más flores) ---
-            setTimeout(() => escape(fillingFlowers), CONFIG.waitTime);
-            
-        }, 2200); // Florecimiento de relleno tras las ramas principales
-    }
-
-    function escape(flowers) {
+    function escapeFlowers(flowers) {
         flowers.forEach(f => {
-            const destX = f.x + (Math.random() - 0.5) * 800;
-            const destY = -200;
+            // Calculamos un destino aleatorio fuera de la pantalla
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 500 + Math.random() * 200;
+            const destX = f.x + Math.cos(angle) * dist;
+            const destY = f.y - dist; // Se van hacia arriba y afuera
+
+            // --- ANIMACIÓN 2: IRSE VOLANDO (ESCAPE) ---
             f.el.animate([
                 { transform: f.el.style.transform, opacity: 1 },
                 { transform: `translate(${destX}px, ${destY}px) rotate(720deg) scale(0)`, opacity: 0 }
             ], {
-                duration: 4000,
-                delay: Math.random() * 2000,
+                duration: CONFIG.escapeTime,
+                delay: Math.random() * 1000, // No se van todas al mismo tiempo
                 easing: 'ease-in',
                 fill: 'forwards'
             });
         });
-        setTimeout(startCycle, 6000);
-    }
-    
-    // Función para obtener puntos en la silueta del corazón (Ecuación Cardioide)
-    function getHeartPoints(cx, cy, scale) {
-        const points = [];
-        for (let i = 0; i < CONFIG.numFlowers; i++) {
-            const t = (i / CONFIG.numFlowers) * 2 * Math.PI;
-            // r controla qué tan lejos del centro está la flor (con aleatoriedad controlada)
-            const r = (Math.sqrt(Math.random()) * scale) + (scale * 0.2); 
-            
-            const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
-            const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-            
-            points.push({ x: cx + xOffset, y: cy + yOffset });
-        }
-        return points;
+
+        // Programamos el reinicio del ciclo
+        setTimeout(startCycle, CONFIG.escapeTime + 1000);
     }
 
+    // Iniciamos la animación por primera vez
     startCycle();
 });
