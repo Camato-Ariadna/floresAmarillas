@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     anim.onfinish = bloom;
 }
-
 function bloom() {
     const heartPath = "M10,30 A5,5 0 0,1 20,30 A5,5 0 0,1 30,30 Q30,45 20,55 Q10,45 10,30 Z";
     const flowers = [];
