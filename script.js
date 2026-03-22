@@ -37,57 +37,67 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function growTree() {
-        const trunk = document.createElementNS(NS, "rect");
-        trunk.setAttribute("x", CONFIG.baseX - CONFIG.trunkWidth / 2);
-        trunk.setAttribute("width", CONFIG.trunkWidth);
-        trunk.setAttribute("y", CONFIG.baseY);
-        trunk.setAttribute("height", 0);
-        trunk.setAttribute("fill", "#8b4513");
-        trunk.setAttribute("rx", "5");
-        svg.appendChild(trunk);
+    const trunk = document.createElementNS(NS, "rect");
+    // Color café sólido para asegurar que se vea
+    trunk.setAttribute("fill", "#5D4037"); 
+    trunk.setAttribute("x", CONFIG.baseX - (CONFIG.trunkWidth / 2));
+    trunk.setAttribute("width", CONFIG.trunkWidth);
+    trunk.setAttribute("y", CONFIG.baseY);
+    trunk.setAttribute("height", 0);
+    trunk.setAttribute("rx", "5");
+    svg.appendChild(trunk);
 
-        const anim = trunk.animate([
-            { y: CONFIG.baseY, height: 0 },
-            { y: CONFIG.baseY - CONFIG.trunkHeight, height: CONFIG.trunkHeight }
+    const anim = trunk.animate([
+        { y: CONFIG.baseY, height: 0 },
+        { y: CONFIG.baseY - CONFIG.trunkHeight, height: CONFIG.trunkHeight }
+    ], {
+        duration: CONFIG.growTime,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+
+    anim.onfinish = bloom;
+}
+
+function bloom() {
+    const heartPath = "M10,30 A5,5 0 0,1 20,30 A5,5 0 0,1 30,30 Q30,45 20,55 Q10,45 10,30 Z";
+    const flowers = [];
+    const centerX = CONFIG.baseX;
+    const centerY = CONFIG.baseY - CONFIG.trunkHeight; // La cima del tronco
+
+    for (let i = 0; i < CONFIG.numFlowers; i++) {
+        const f = document.createElementNS(NS, "path");
+        f.setAttribute("d", heartPath);
+        f.setAttribute("fill", "#FFD700");
+        
+        // --- FÓRMULA PARA FORMAR UN CORAZÓN GRANDE ---
+        // Usamos una ecuación paramétrica de corazón para ubicar cada flor
+        const t = Math.random() * 2 * Math.PI;
+        const scale = Math.random() * 8; // Dispersión interna
+        
+        // Ecuación clásica del corazón (ajustada para SVG)
+        const xOffset = scale * (16 * Math.pow(Math.sin(t), 3));
+        const yOffset = -scale * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+
+        const finalX = centerX + xOffset - 20; // -20 para centrar el path de la florecita
+        const finalY = centerY + yOffset - 20;
+
+        f.setAttribute("transform", `translate(${finalX}px, ${finalY}px) scale(0)`);
+        svg.appendChild(f);
+        flowers.push({ el: f, x: finalX, y: finalY });
+
+        f.animate([
+            { transform: `translate(${finalX}px, ${finalY}px) scale(0)`, opacity: 0 },
+            { transform: `translate(${finalX}px, ${finalY}px) scale(1.2)`, opacity: 1 }
         ], {
-            duration: CONFIG.growTime,
-            easing: 'ease-out',
+            duration: 1000,
+            delay: Math.random() * CONFIG.bloomTime,
+            easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
             fill: 'forwards'
         });
-
-        anim.onfinish = bloom;
     }
-
-    function bloom() {
-        const heartPath = "M10,30 A5,5 0 0,1 20,30 A5,5 0 0,1 30,30 Q30,45 20,55 Q10,45 10,30 Z";
-        const flowers = [];
-
-        for (let i = 0; i < CONFIG.numFlowers; i++) {
-            const f = document.createElementNS(NS, "path");
-            f.setAttribute("d", heartPath);
-            f.setAttribute("fill", "#FFD700");
-            
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 120;
-            const x = CONFIG.baseX + Math.cos(angle) * dist - 20;
-            const y = (CONFIG.baseY - CONFIG.trunkHeight) + Math.sin(angle) * dist * 0.5 - 20;
-
-            f.setAttribute("transform", `translate(${x}, ${y}) scale(0)`);
-            svg.appendChild(f);
-            flowers.push({ el: f, x, y });
-
-            f.animate([
-    { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 },
-    { transform: `translate(${x}px, ${y}px) scale(1.5)`, opacity: 1 }
-], {
-    duration: 800,
-    delay: Math.random() * CONFIG.bloomTime,
-    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-    fill: 'forwards'
-});
-        }
-        setTimeout(() => escape(flowers), CONFIG.bloomTime + CONFIG.waitTime);
-    }
+    setTimeout(() => escape(flowers), CONFIG.bloomTime + CONFIG.waitTime);
+}
 
     function escape(flowers) {
         flowers.forEach(f => {
