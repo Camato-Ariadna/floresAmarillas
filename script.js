@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- 1. CONTADOR (Se mantiene igual) ---
+    // 1. CONTADOR (Mantener igual)
     const counterElement = document.getElementById("flower-counter");
     if (counterElement) {
         const startDate = new Date("2026-03-14T00:00:00");
@@ -19,9 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const CONFIG = {
         baseX: 300,
         baseY: 550,
-        trunkHeight: 180, // Mantengo la altura base del tronco
-        numFlowers: 350,  // ¡Subimos la densidad para rellenar!
-        growTime: 2000,
+        numFlowers: 400, // ¡Volvemos a alta densidad para que se llene!
         waitTime: 6000
     };
 
@@ -35,13 +33,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 </radialGradient>
             </defs>
         `;
-        growTreeAndBloom();
+        // Paso 2: Creamos el árbol y guardamos los puntos de las puntas
+        const treeBranchTips = [];
+        growTreeAndBloom(treeBranchTips);
     }
 
-    // --- NUEVA LÓGICA INTEGRADA ---
-
-    function createOrganicBranch(x1, y1, angle, length, width, isMainTip = false) {
-        if (length < 15 && !isMainTip) return null; // Límite para ramitas
+    // NUEVA FUNCIÓN DE CRECIMIENTO RECURSIVO INTEGRADO
+    function createBranchRecursive(x1, y1, angle, length, width, level, maxLevel, branchTipsArray) {
+        if (level >= maxLevel) {
+            // Si es una punta final, la guardamos para las flores de densidad
+            branchTipsArray.push({ x: x1, y: y1 });
+            return;
+        }
 
         const x2 = x1 + Math.cos(angle * Math.PI / 180) * length;
         const y2 = y1 + Math.sin(angle * Math.PI / 180) * length;
@@ -59,29 +62,25 @@ document.addEventListener("DOMContentLoaded", () => {
         svg.appendChild(line);
 
         line.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
-            duration: 800,
+            duration: 700 + (level * 200), // Ramas principales más lentas
             fill: 'forwards',
-            easing: 'ease-out'
+            easing: 'ease-in-out'
         });
 
-        // Retornamos las coordenadas de la punta para el nacimiento de flores
-        return { x: x2, y: y2 };
-    }
+        // --- FLORECIMIENTO INTEGRADO ---
+        // Nace una flor grande exactamente en la punta de cada rama principal que termina de crecer
+        setTimeout(() => {
+           const animFlower = document.createElementNS(NS, "path");
+           // Usamos x2 y y2, las coordenadas finales de la rama
+           createSingleOrganicFlower(animFlower, x2, y2, 1.3, 1500);
+        }, 600 + (level * 200));
 
-    // Función para obtener puntos en la silueta del corazón (Ecuación Cardioide)
-    function getHeartPoints(cx, cy, scale) {
-        const points = [];
-        for (let i = 0; i < CONFIG.numFlowers; i++) {
-            const t = (i / CONFIG.numFlowers) * 2 * Math.PI;
-            // r controla qué tan lejos del centro está la flor (con aleatoriedad controlada)
-            const r = (Math.sqrt(Math.random()) * scale) + (scale * 0.2); 
-            
-            const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
-            const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-            
-            points.push({ x: cx + xOffset, y: cy + yOffset });
-        }
-        return points;
+        // Crear dos ramas más pequeñas (hijas) con ángulos que formen corazón
+        const angleSpread = 30 + (level * 3); // Aumentamos la apertura arriba
+        setTimeout(() => {
+            createBranchRecursive(x2, y2, angle - angleSpread, length * 0.72, width * 0.65, level + 1, maxLevel, branchTipsArray);
+            createBranchRecursive(x2, y2, angle + angleSpread, length * 0.72, width * 0.65, level + 1, maxLevel, branchTipsArray);
+        }, 500 + (level * 150)); // Retraso en cascada
     }
 
     function createSingleOrganicFlower(f, centerX, centerY, scaleFactor, animDuration) {
@@ -104,66 +103,30 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function growTreeAndBloom() {
-        const trunkCoords = createOrganicBranch(CONFIG.baseX, CONFIG.baseY, -90, CONFIG.trunkHeight, 15, true);
-        const trunkTipX = trunkCoords.x;
-        const trunkTipY = trunkCoords.y;
-
-        // --- DEFINIR LAS RAMAS PRINCIPALES DEL CORAZÓN ---
-        // Obtenemos puntos fijos en el corazón para guiar las ramas
-        const heartPoints = getHeartPoints(CONFIG.baseX, CONFIG.baseY - CONFIG.trunkHeight - 40, 10);
-        const mainBranchTargets = [];
-        // Seleccionamos puntos clave del corazón (izquierda, arriba, derecha, centro)
-        const sampleIndices = [0, CONFIG.numFlowers * 0.25, CONFIG.numFlowers * 0.5, CONFIG.numFlowers * 0.75, CONFIG.numFlowers / 2];
+    function growTreeAndBloom(branchTips) {
+        // Tronco principal: 
+        // 180px de altura y se divide en 6 niveles de ramas
+        createBranchRecursive(CONFIG.baseX, CONFIG.baseY, -90, 180, 15, 0, 6, branchTips);
         
-        // --- RAMAS QUE DEFINEN LA COPA ---
-        sampleIndices.forEach((index) => {
-            const target = heartPoints[Math.floor(index)];
-            if (target) {
-                mainBranchTargets.push(target);
-                const angle = Math.atan2(target.y - trunkTipY, target.x - trunkTipX) * 180 / Math.PI;
-                const length = Math.sqrt(Math.pow(target.x - trunkTipX, 2) + Math.pow(target.y - trunkTipY, 2));
-                
-                // Crecimiento retardado de las ramas principales
-                setTimeout(() => {
-                    const tip = createOrganicBranch(trunkTipX, trunkTipY, angle, length * 0.9, 6, true);
-                    
-                    // --- FLORECIMIENTO DESDE LAS PUNTAS PRINCIPALES ---
-                    // Nace una flor grande exactamente en la punta de cada rama principal
-                    setTimeout(() => {
-                        for(let k = 0; k < 8; k++) { // Racimo en cada punta principal
-                           const animFlower = document.createElementNS(NS, "path");
-                           createSingleOrganicFlower(animFlower, tip.x, tip.y, 1.5, 1500);
-                        }
-                    }, 800);
-                    
-                    // Ramitas secundarias que nacen de las principales
-                    setTimeout(() => {
-                        createOrganicBranch(tip.x, tip.y, angle - 20, length * 0.3, 3);
-                        createOrganicBranch(tip.x, tip.y, angle + 20, length * 0.3, 3);
-                    }, 1000);
-
-                }, Math.random() * 500 + 800); // Retraso tras el tronco
-            }
-        });
-
-        // --- FLORECIMIENTO DE RELLENO (Guiado por el corazón) ---
+        // --- FLORECIMIENTO DE RELLENO (Densidad) ---
+        // Nace de las puntas finales para que el corazón se vea lleno
         setTimeout(() => {
-            const fillingPoints = getHeartPoints(CONFIG.baseX, CONFIG.baseY - CONFIG.trunkHeight - 40, 13);
+            // Usamos una ecuación de corazón (Cardioide) guiada por el árbol
+            const fillingPoints = getHeartPoints(CONFIG.baseX, CONFIG.baseY - 180 - 60, 13);
             const fillingFlowers = [];
             
             for (let i = 0; i < CONFIG.numFlowers; i++) {
                 const targetPoint = fillingPoints[i];
                 const animFlower = document.createElementNS(NS, "path");
                 // Nacimiento de las flores de relleno
-                createSingleOrganicFlower(animFlower, targetPoint.x, targetPoint.y, Math.random() * 1.2 + 0.3, 1200);
+                createSingleOrganicFlower(animFlower, targetPoint.x, targetPoint.y, Math.random() * 1.0 + 0.3, 1200);
                 fillingFlowers.push({ el: animFlower, x: targetPoint.x, y: targetPoint.y });
             }
             
             // --- ESCAPE (SE MANTIENE IGUAL, pero con más flores) ---
             setTimeout(() => escape(fillingFlowers), CONFIG.waitTime);
             
-        }, 1800); // Florecimiento de relleno tras las ramas
+        }, 2200); // Florecimiento de relleno tras las ramas principales
     }
 
     function escape(flowers) {
@@ -181,6 +144,22 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
         setTimeout(startCycle, 6000);
+    }
+    
+    // Función para obtener puntos en la silueta del corazón (Ecuación Cardioide)
+    function getHeartPoints(cx, cy, scale) {
+        const points = [];
+        for (let i = 0; i < CONFIG.numFlowers; i++) {
+            const t = (i / CONFIG.numFlowers) * 2 * Math.PI;
+            // r controla qué tan lejos del centro está la flor (con aleatoriedad controlada)
+            const r = (Math.sqrt(Math.random()) * scale) + (scale * 0.2); 
+            
+            const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
+            const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            
+            points.push({ x: cx + xOffset, y: cy + yOffset });
+        }
+        return points;
     }
 
     startCycle();
