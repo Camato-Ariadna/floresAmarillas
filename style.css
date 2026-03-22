@@ -20,7 +20,6 @@ header {
 .main-title {
     font-size: 3rem;
     color: #d4a017; /* Amarillo mostaza elegante */
-    text-transform: lowercase;
     letter-spacing: 5px;
 }
 
