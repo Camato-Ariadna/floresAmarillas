@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const CONFIG = {
         baseX: 300,
-        baseY: 280,
-        numFlowers: 450, // Cantidad óptima para fluidez y densidad
+        baseY: 300,
+        numFlowers: 500, // ¡Subimos para asegurar el relleno!
         bloomTime: 2000,
         waitTime: 4000,
         escapeTime: 3000
@@ -39,13 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
             f.setAttribute("stroke", "#FBC02D");
             f.setAttribute("stroke-width", "0.2");
             
-            // --- DISTRIBUCIÓN MEJORADA (Uniforme) ---
-            // Usamos una distribución más homogénea dentro de la forma
             const t = (i / CONFIG.numFlowers) * 2 * Math.PI;
-            const r = 10 + Math.sqrt(Math.random()) * 2.5; // Radio base + variación
             
-            // Ecuación de corazón pura con una pizca de ruido para naturalidad
-            const noise = (Math.random() - 0.5) * 2;
+            // --- AJUSTE DE PRECISIÓN (Compacto) ---
+            // Un radio pequeño y uniforme para que se peguen a la forma
+            const r = 6.5 + Math.random() * 0.5; // Muy poca variación para que sea denso
+            
+            // --- REDUCCIÓN DRÁSTICA DEL NOISE ---
+            // Bajamos el ruido a 0.2 para que no se dispersen
+            const noise = (Math.random() - 0.5) * 0.2;
             const xOffset = r * (16 * Math.pow(Math.sin(t), 3)) + noise;
             const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) + noise;
 
@@ -55,16 +57,17 @@ document.addEventListener("DOMContentLoaded", () => {
             f.style.opacity = "0";
             svg.appendChild(f);
             
-            const scale = Math.random() * 0.7 + 0.5; // Flores un poco más pequeñas para que no se pisen
+            // Flores más grandes para rellenar los huecos
+            const scale = Math.random() * 1.0 + 1.2; // Escala grande (1.2x - 2.2x)
             const rotation = Math.random() * 360;
 
             f.animate([
                 { transform: `translate(${finalX}px, ${finalY}px) scale(0) rotate(0deg)`, opacity: 0 },
                 { transform: `translate(${finalX}px, ${finalY}px) scale(${scale}) rotate(${rotation}deg)`, opacity: 1 }
             ], {
-                duration: 800,
-                delay: (i / CONFIG.numFlowers) * CONFIG.bloomTime, // Aparecen en orden circular (efecto mágico)
-                easing: 'ease-out',
+                duration: 900,
+                delay: (i / CONFIG.numFlowers) * CONFIG.bloomTime,
+                easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Efecto pop
                 fill: 'forwards'
             });
 
@@ -76,17 +79,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function escapeFlowers(flowers) {
         flowers.forEach((f, i) => {
-            const angle = (i / flowers.length) * 2 * Math.PI;
-            const dist = 600;
+            const angle = Math.random() * 2 * Math.PI;
+            const dist = 700;
             const destX = f.x + Math.cos(angle) * dist;
-            const destY = f.y - (Math.random() * 500); 
+            const destY = f.y - (Math.random() * 600 + 200); 
 
             f.el.animate([
                 { transform: `translate(${f.x}px, ${f.y}px) scale(${f.scale}) rotate(${f.rotation}deg)`, opacity: 1 },
-                { transform: `translate(${destX}px, ${destY}px) scale(0) rotate(${f.rotation + 360}deg)`, opacity: 0 }
+                { transform: `translate(${destX}px, ${destY}px) scale(0) rotate(${f.rotation + 1080}deg)`, opacity: 0 }
             ], {
                 duration: 2500,
-                delay: Math.random() * 1000,
+                delay: Math.random() * 1500,
                 easing: 'ease-in',
                 fill: 'forwards'
             });
