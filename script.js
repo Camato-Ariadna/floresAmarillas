@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
         baseY: 550,
         trunkHeight: 220,
         trunkWidth: 12,
-        numFlowers: 80, // Más flores para llenar el corazón
+        numFlowers: 450, // Más flores para llenar el corazón
         growTime: 1500,
         waitTime: 5000
     };
