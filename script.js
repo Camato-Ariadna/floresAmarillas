@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // --- DISTRIBUCIÓN MEJORADA (Uniforme) ---
             // Usamos una distribución más homogénea dentro de la forma
             const t = (i / CONFIG.numFlowers) * 2 * Math.PI;
-            const r = 10 + Math.sqrt(Math.random()) * 4; // Radio base + variación
+            const r = 10 + Math.sqrt(Math.random()) * 2.5; // Radio base + variación
             
             // Ecuación de corazón pura con una pizca de ruido para naturalidad
             const noise = (Math.random() - 0.5) * 2;
