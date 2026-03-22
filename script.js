@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         counterElement.innerText = totalFlowers.toLocaleString();
     }
 
-    // 2. ANIMACIÓN
+    // 2. CONFIGURACIÓN DE LA ANIMACIÓN
     const svg = document.getElementById("garden-svg");
     if (!svg) return; 
 
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         trunkWidth: 15,
         baseY: 550, 
         baseX: 300,
-        numFlowers: 50, // Subí un poco para que el corazón se vea más lleno
+        numFlowers: 60, // Aumentado para que el corazón se vea mejor
         growTime: 2000, 
         bloomTime: 1000, 
         waitTime: 4000, 
@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     function startCycle() {
+        // Limpia flores y troncos anteriores
         const toRemove = svg.querySelectorAll('rect, path:not([id])');
         toRemove.forEach(el => el.remove());
         growTree();
@@ -69,8 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
             f.setAttribute("fill", "#FFD700");
             
             const t = Math.random() * 2 * Math.PI;
-            const scale = Math.random() * 8 + 2; 
+            const scale = Math.random() * 8 + 3; 
             
+            // Ecuación paramétrica de corazón
             const xOffset = scale * (16 * Math.pow(Math.sin(t), 3));
             const yOffset = -scale * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
 
@@ -112,6 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(startCycle, CONFIG.escapeTime + 1000);
     }
 
-    // ESTA ES LA LÍNEA QUE FALTABA:
-    startCycle(); 
-});
+    // Iniciar el ciclo por primera vez
+    startCycle();
+}); // <-- Esta es la llave que faltaba para cerrar el addEventListener
