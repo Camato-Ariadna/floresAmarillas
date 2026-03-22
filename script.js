@@ -63,26 +63,24 @@ function bloom() {
     const heartPath = "M10,30 A5,5 0 0,1 20,30 A5,5 0 0,1 30,30 Q30,45 20,55 Q10,45 10,30 Z";
     const flowers = [];
     const centerX = CONFIG.baseX;
-    const centerY = CONFIG.baseY - CONFIG.trunkHeight; // La cima del tronco
+    const centerY = CONFIG.baseY - CONFIG.trunkHeight;
 
     for (let i = 0; i < CONFIG.numFlowers; i++) {
         const f = document.createElementNS(NS, "path");
         f.setAttribute("d", heartPath);
         f.setAttribute("fill", "#FFD700");
         
-        // --- FÓRMULA PARA FORMAR UN CORAZÓN GRANDE ---
-        // Usamos una ecuación paramétrica de corazón para ubicar cada flor
         const t = Math.random() * 2 * Math.PI;
-        const scale = Math.random() * 8; // Dispersión interna
+        const scale = Math.random() * 8 + 2; 
         
-        // Ecuación clásica del corazón (ajustada para SVG)
         const xOffset = scale * (16 * Math.pow(Math.sin(t), 3));
         const yOffset = -scale * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
 
-        const finalX = centerX + xOffset - 20; // -20 para centrar el path de la florecita
+        const finalX = centerX + xOffset - 20;
         const finalY = centerY + yOffset - 20;
 
-        f.setAttribute("transform", `translate(${finalX}px, ${finalY}px) scale(0)`);
+        // CORRECCIÓN: Quitamos 'px' y la coma interna
+        f.setAttribute("transform", `translate(${finalX} ${finalY}) scale(0)`);
         svg.appendChild(f);
         flowers.push({ el: f, x: finalX, y: finalY });
 
@@ -99,23 +97,20 @@ function bloom() {
     setTimeout(() => escape(flowers), CONFIG.bloomTime + CONFIG.waitTime);
 }
 
-    function escape(flowers) {
-        flowers.forEach(f => {
-            const destX = f.x + (Math.random() - 0.5) * 800;
-            const destY = -200;
+function escape(flowers) {
+    flowers.forEach(f => {
+        const destX = f.x + (Math.random() - 0.5) * 800;
+        const destY = -200;
 
-           f.el.animate([
-    { transform: `translate(${f.x}px, ${f.y}px) scale(1.5)`, opacity: 1 },
-    { transform: `translate(${destX}px, ${destY}px) scale(0.5)`, opacity: 0 }
-], {
-    duration: CONFIG.escapeTime,
-    delay: Math.random() * 800,
-    easing: 'ease-in',
-    fill: 'forwards'
-});
+        f.el.animate([
+            { transform: `translate(${f.x}px, ${f.y}px) scale(1.2)`, opacity: 1 },
+            { transform: `translate(${destX}px, ${destY}px) scale(0.5)`, opacity: 0 }
+        ], {
+            duration: CONFIG.escapeTime,
+            delay: Math.random() * 800,
+            easing: 'ease-in',
+            fill: 'forwards'
         });
-        setTimeout(startCycle, CONFIG.escapeTime + 1000);
-    }
-
-    startCycle();
-});
+    });
+    setTimeout(startCycle, CONFIG.escapeTime + 1000);
+}
