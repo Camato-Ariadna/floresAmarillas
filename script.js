@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. CONTADOR (Mantener igual)
+    // 1. CONTADOR (Se mantiene igual)
     const counterElement = document.getElementById("flower-counter");
     if (counterElement) {
         const startDate = new Date("2026-03-14T00:00:00");
@@ -19,80 +19,85 @@ document.addEventListener("DOMContentLoaded", () => {
     const CONFIG = {
         baseX: 300,
         baseY: 550,
-        trunkHeight: 220,
-        trunkWidth: 12,
-        numFlowers: 1450, // Más flores para llenar el corazón
-        growTime: 1500,
-        waitTime: 5000
+        trunkHeight: 180,
+        numFlowers: 250, // ¡Mucha más densidad!
+        growTime: 2000,
+        waitTime: 6000
     };
 
     function startCycle() {
-        svg.innerHTML = svg.innerHTML; // Reset técnico
-        const toRemove = svg.querySelectorAll('rect, path, line, g');
-        toRemove.forEach(el => el.remove());
-        growOrganicTree();
+        svg.innerHTML = ''; // Limpieza total
+        // Añadir gradiente para las flores (opcional para brillo)
+        svg.innerHTML = `
+            <defs>
+                <radialGradient id="flowerGrad">
+                    <stop offset="10%" stop-color="#FFF59D" />
+                    <stop offset="95%" stop-color="#FDD835" />
+                </radialGradient>
+            </defs>
+        `;
+        growTree();
     }
 
-    function growOrganicTree() {
-        // --- EL TRONCO ---
-        const trunk = document.createElementNS(NS, "rect");
-        trunk.setAttribute("fill", "#5D4037");
-        trunk.setAttribute("x", CONFIG.baseX - CONFIG.trunkWidth / 2);
-        trunk.setAttribute("y", CONFIG.baseY - CONFIG.trunkHeight);
-        trunk.setAttribute("width", CONFIG.trunkWidth);
-        trunk.setAttribute("height", CONFIG.trunkHeight);
-        trunk.setAttribute("rx", 4);
-        trunk.style.transformOrigin = `${CONFIG.baseX}px ${CONFIG.baseY}px`;
-        trunk.style.transform = "scaleY(0)";
-        svg.appendChild(trunk);
+    function createBranch(x1, y1, angle, length, width) {
+        if (length < 10) return; // Límite de las ramas pequeñas
 
-        const trunkAnim = trunk.animate([{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], 
-            { duration: CONFIG.growTime, easing: 'ease-out', fill: 'forwards' });
+        const x2 = x1 + Math.cos(angle * Math.PI / 180) * length;
+        const y2 = y1 + Math.sin(angle * Math.PI / 180) * length;
 
-        trunkAnim.onfinish = () => {
-            // --- LAS RAMAS (Para que parezca árbol) ---
-            const branchCoords = [
-                { x2: CONFIG.baseX - 60, y2: CONFIG.baseY - CONFIG.trunkHeight - 40 },
-                { x2: CONFIG.baseX + 60, y2: CONFIG.baseY - CONFIG.trunkHeight - 40 },
-                { x2: CONFIG.baseX, y2: CONFIG.baseY - CONFIG.trunkHeight - 80 }
-            ];
+        const line = document.createElementNS(NS, "line");
+        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "#4E342E");
+        line.setAttribute("stroke-width", width);
+        line.setAttribute("stroke-linecap", "round");
+        
+        // Animación de crecimiento de la rama
+        line.style.strokeDasharray = length;
+        line.style.strokeDashoffset = length;
+        svg.appendChild(line);
 
-            branchCoords.forEach(coord => {
-                const branch = document.createElementNS(NS, "line");
-                branch.setAttribute("x1", CONFIG.baseX);
-                branch.setAttribute("y1", CONFIG.baseY - CONFIG.trunkHeight);
-                branch.setAttribute("x2", coord.x2);
-                branch.setAttribute("y2", coord.y2);
-                branch.setAttribute("stroke", "#5D4037");
-                branch.setAttribute("stroke-width", 6);
-                branch.setAttribute("stroke-linecap", "round");
-                branch.style.opacity = "0";
-                svg.appendChild(branch);
-                branch.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500, fill: 'forwards' });
-            });
+        line.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], {
+            duration: 800,
+            fill: 'forwards',
+            easing: 'ease-in-out'
+        });
 
-            setTimeout(bloomOrganic, 300);
-        };
+        // Crear dos ramas más pequeñas (hijas)
+        setTimeout(() => {
+            createBranch(x2, y2, angle - 25, length * 0.7, width * 0.6);
+            createBranch(x2, y2, angle + 25, length * 0.7, width * 0.6);
+        }, 500);
     }
 
-    function bloomOrganic() {
+    function growTree() {
+        // Tronco principal
+        createBranch(CONFIG.baseX, CONFIG.baseY, -90, CONFIG.trunkHeight, 15);
+        
+        // Empezar a florecer un poco antes de que termine de crecer
+        setTimeout(bloomIntoHeart, 1500);
+    }
+
+    function bloomIntoHeart() {
         const flowers = [];
-        // Path de una FLOR real (centro y 4 pétalos)
-        const flowerPath = "M0,0 Q5,-10 10,0 Q20,-10 20,0 Q25,10 10,10 Q0,20 0,10 Q-10,10 -10,0 Q-5,-10 0,0";
+        // Path de pétalos más suave
+        const flowerPath = "M0,0 C-2,-5 -5,-5 -5,0 C-5,5 -2,5 0,0 C2,5 5,5 5,0 C5,-5 2,-5 0,0";
         
         const centerX = CONFIG.baseX;
-        const centerY = CONFIG.baseY - CONFIG.trunkHeight - 60;
+        const centerY = CONFIG.baseY - CONFIG.trunkHeight - 50;
 
         for (let i = 0; i < CONFIG.numFlowers; i++) {
             const f = document.createElementNS(NS, "path");
             f.setAttribute("d", flowerPath);
-            f.setAttribute("fill", "#FFD700"); // Amarillo
-            f.setAttribute("stroke", "#DAA520"); // Borde dorado
-            f.setAttribute("stroke-width", "0.5");
+            f.setAttribute("fill", "url(#flowerGrad)");
+            f.setAttribute("stroke", "#FBC02D");
+            f.setAttribute("stroke-width", "0.2");
             
-            // Ecuación de Corazón (Cardioide) para la copa
+            // --- ECUACIÓN DE CORAZÓN DE ALTA DENSIDAD ---
             const t = Math.random() * 2 * Math.PI;
-            const r = Math.random() * 10 + 2; // Densidad
+            // r controla qué tan lejos del centro está la flor
+            const r = (Math.sqrt(Math.random()) * 12) + 2; 
+            
             const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
             const yOffset = -r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
 
@@ -104,12 +109,12 @@ document.addEventListener("DOMContentLoaded", () => {
             flowers.push({ el: f, x: finalX, y: finalY });
 
             f.animate([
-                { transform: `translate(${finalX}px, ${finalY}px) scale(0) rotate(0deg)`, opacity: 0 },
-                { transform: `translate(${finalX}px, ${finalY}px) scale(0.6) rotate(${Math.random() * 360}deg)`, opacity: 1 }
+                { transform: `translate(${finalX}px, ${finalY}px) scale(0)`, opacity: 0 },
+                { transform: `translate(${finalX}px, ${finalY}px) scale(${Math.random() * 1.5 + 0.5}) rotate(${Math.random() * 360}deg)`, opacity: 1 }
             ], {
-                duration: 1500,
-                delay: Math.random() * 2000,
-                easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                duration: 1200,
+                delay: Math.random() * 3000, // Florece poco a poco
+                easing: 'back.out(1.7)',
                 fill: 'forwards'
             });
         }
@@ -118,19 +123,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function escape(flowers) {
         flowers.forEach(f => {
-            const destX = f.x + (Math.random() - 0.5) * 1000;
-            const destY = -200;
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 600 + Math.random() * 200;
+            const destX = f.x + Math.cos(angle) * dist;
+            const destY = f.y - dist;
+
             f.el.animate([
                 { transform: f.el.style.transform, opacity: 1 },
-                { transform: `translate(${destX}px, ${destY}px) rotate(360deg) scale(0.2)`, opacity: 0 }
+                { transform: `translate(${destX}px, ${destY}px) rotate(720deg) scale(0)`, opacity: 0 }
             ], {
-                duration: 3000,
-                delay: Math.random() * 1000,
+                duration: 4000,
+                delay: Math.random() * 2000,
                 easing: 'ease-in',
                 fill: 'forwards'
             });
         });
-        setTimeout(startCycle, 4000);
+        setTimeout(startCycle, 6000);
     }
 
     startCycle();
