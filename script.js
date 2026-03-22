@@ -80,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bloomIntoHeart() {
         const flowers = [];
-        // Path de pétalos más suave
         const flowerPath = "M0,0 C-2,-5 -5,-5 -5,0 C-5,5 -2,5 0,0 C2,5 5,5 5,0 C5,-5 2,-5 0,0";
         
         const centerX = CONFIG.baseX;
@@ -93,9 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             f.setAttribute("stroke", "#FBC02D");
             f.setAttribute("stroke-width", "0.2");
             
-            // --- ECUACIÓN DE CORAZÓN DE ALTA DENSIDAD ---
             const t = Math.random() * 2 * Math.PI;
-            // r controla qué tan lejos del centro está la flor
             const r = (Math.sqrt(Math.random()) * 12) + 2; 
             
             const xOffset = r * (16 * Math.pow(Math.sin(t), 3));
@@ -113,8 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 { transform: `translate(${finalX}px, ${finalY}px) scale(${Math.random() * 1.5 + 0.5}) rotate(${Math.random() * 360}deg)`, opacity: 1 }
             ], {
                 duration: 1200,
-                delay: Math.random() * 3000, // Florece poco a poco
-                easing: 'back.out(1.7)',
+                delay: Math.random() * 3000, 
+                easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', // <-- CORREGIDO AQUÍ
                 fill: 'forwards'
             });
         }
