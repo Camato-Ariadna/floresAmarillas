@@ -41,14 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
         trunk.setAttribute("fill", "#5D4037"); 
         trunk.setAttribute("x", CONFIG.baseX - (CONFIG.trunkWidth / 2));
         trunk.setAttribute("width", CONFIG.trunkWidth);
-        trunk.setAttribute("y", CONFIG.baseY);
-        trunk.setAttribute("height", 0);
+        
+        // Seteamos la altura final de una vez
+        trunk.setAttribute("y", CONFIG.baseY - CONFIG.trunkHeight);
+        trunk.setAttribute("height", CONFIG.trunkHeight);
         trunk.setAttribute("rx", "5");
+        
+        // Pero lo encogemos con transform para animarlo
+        trunk.style.transformOrigin = `${CONFIG.baseX}px ${CONFIG.baseY}px`;
+        trunk.style.transform = "scaleY(0)";
+        
         svg.appendChild(trunk);
 
+        // Animamos el escalado, que es más compatible
         const anim = trunk.animate([
-            { y: CONFIG.baseY, height: 0 },
-            { y: CONFIG.baseY - CONFIG.trunkHeight, height: CONFIG.trunkHeight }
+            { transform: "scaleY(0)" },
+            { transform: "scaleY(1)" }
         ], {
             duration: CONFIG.growTime,
             easing: 'ease-out',
