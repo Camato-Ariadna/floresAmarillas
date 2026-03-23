@@ -20,7 +20,6 @@ header {
 .main-title {
     font-size: 3rem;
     color: #d4a017; /* Amarillo mostaza elegante */
-    text-transform: uppercase;
     letter-spacing: 5px;
 }
 
@@ -31,7 +30,7 @@ header {
 }
 
 .left-panel {
-    flex: 0 0 35%;
+    flex: 0 0 50%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,7 +46,7 @@ header {
 }
 
 .right-panel {
-    flex: 0 0 65%;
+    flex: 0 0 50%;
     display: flex;
     justify-content: center;
     align-items: center;
