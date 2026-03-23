@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const CONFIG = {
         baseX: 300,
         baseY: 300,
-        numFlowers: 500, // ¡Subimos para asegurar el relleno!
+        numFlowers: 250, // ¡Subimos para asegurar el relleno!
         bloomTime: 2000,
         waitTime: 4000,
         escapeTime: 3000
